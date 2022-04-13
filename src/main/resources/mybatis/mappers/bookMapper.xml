@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.sample.mapper.BookMapper">
+
+	<select id="getAllBooks" resultType="com.sample.vo.Book">
+		select
+			book_no 					as no,
+			book_title 					as title,
+			book_author 				as author,
+			book_publisher 				as publisher,
+			book_price 					as price,
+			book_discount_price 		as discountPrice,
+			book_pub_date 				as pubDate,
+			book_stock 					as stock,
+			book_updated_date 			as updatedDate,
+			book_created_date 			as createdDate
+		from
+			tb_book
+		<where>
+			<if test="opt != null and value != null">
+				<choose>
+					<when test="opt == '제목'">
+						book_title like '%' || #{value} || '%'
+					</when>
+					<when test="opt == '저자'">
+						book_author like '%' || #{value} || '%'
+					</when>
+					<when test="opt == '출판사'">
+						book_publisher like '%' || #{value} || '%'
+					</when>
+					<when test="opt == '최소가격'">
+						book_price &gt;= to_number(#{value})
+					</when>
+					<when test="opt == '최대가격'">
+						book_price &lt;= to_number(#{value})
+					</when>
+				</choose>
+			</if>
+		</where>	
+		order by book_no
+	</select>
+	
+	<select id="getBookByNo" parameterType="int" resultType="com.sample.vo.Book">
+		select
+			book_no 					as no,
+			book_title 					as title,
+			book_author 				as author,
+			book_publisher 				as publisher,
+			book_price 					as price,
+			book_discount_price 		as discountPrice,
+			book_pub_date 				as pubDate,
+			book_stock 					as stock,
+			book_updated_date 			as updatedDate,
+			book_created_date 			as createdDate
+		from
+			tb_book
+		where
+			book_no = #{value}
+	</select>
+	
+	<select id="getBooksTotalRows" parameterType="com.sample.web.form.Criteria" resultType="int">
+		select count(*)
+		from tb_book
+		<where>
+			<if test="opt != null and value != null">
+				<choose>
+					<when test="opt == '제목'">
+						book_title like '%' || #{value} || '%'
+					</when>
+					<when test="opt == '저자'">
+						book_author like '%' || #{value} || '%'
+					</when>
+					<when test="opt == '출판사'">
+						book_publisher like '%' || #{value} || '%'
+					</when>
+					<when test="opt == '최소가격'">
+						book_price &gt;= to_number(#{value})
+					</when>
+					<when test="opt == '최대가격'">
+						book_price &lt;= to_number(#{value})
+					</when>
+				</choose>
+			</if>
+		</where>			
+	</select>
+</mapper>
