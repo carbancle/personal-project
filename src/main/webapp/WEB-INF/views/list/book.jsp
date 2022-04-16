@@ -15,36 +15,36 @@
 <body>
 <div class="container">
 	<div class="row mb-3">
-		<div class="col">
-			<div id="form-search-book" class="row row-cols-lg-auto g-3 align-items-center">
-			<!-- <form id="form-search-book" class="row row-cols-lg-auto g-3 align-items-center" method="get" action="book"> -->
-				<input type="hidden" name="page" value="1" />
-				<div class="col-12">
-					<select class="form-select" name="opt">
-						<option value="" selected disabled="disabled">검색조건을 선택하세요</option>
-						<option value="제목" ${'제목' eq param.opt ? 'selected' : ''}> 제목으로 검색</option>
-						<option value="저자" ${'저자' eq param.opt ? 'selected' : ''}> 저자 검색</option>
-						<option value="출판사" ${'출판사' eq param.opt ? 'selected' : ''}> 출판사로 검색</option>
-						<option value="최소가격" ${'최소가격' eq param.opt ? 'selected' : ''}> 최소가격으로 검색</option>
-						<option value="최대가격" ${'최대가격' eq param.opt ? 'selected' : ''}> 최대가격으로 검색</option>
-					</select>
+		<form id="form-search-book" class="row" method="get" action="book" onsubmit="return false;">
+			<div class="col">
+				<div class="row row-cols-lg-auto g-3 align-items-center">
+					<input type="hidden" name="page" value="1" />
+					<div class="col-12">
+						<select class="form-select" name="opt">
+							<option value="" selected disabled="disabled">검색조건을 선택하세요</option>
+							<option value="제목" ${'제목' eq param.opt ? 'selected' : ''}> 제목으로 검색</option>
+							<option value="저자" ${'저자' eq param.opt ? 'selected' : ''}> 저자 검색</option>
+							<option value="출판사" ${'출판사' eq param.opt ? 'selected' : ''}> 출판사로 검색</option>
+							<option value="최소가격" ${'최소가격' eq param.opt ? 'selected' : ''}> 최소가격으로 검색</option>
+							<option value="최대가격" ${'최대가격' eq param.opt ? 'selected' : ''}> 최대가격으로 검색</option>
+						</select>
+					</div>
+					<div class="col-12">
+						<input type="text" class="form-control" name="value" value="${param.value }">
+					</div>
+					<div class="col-12">
+						<button type="button" class="btn btn-outline-primary btn-sm" id="btn-search-book">검색</button>
+					</div>
 				</div>
-				<div class="col-12">
-					<input type="text" class="form-control" name="value" value="${param.value }">
-				</div>
-				<div class="col-12">
-					<button type="button" class="btn btn-outline-primary btn-sm" id="btn-search-book">검색</button>
-				</div>
-			<!-- </form> -->
 			</div>
-		</div>
-		<div class="col">
-			<select id="rowsPerPage">
-		        <option value="10">10개씩보기</option>
-		        <option value="15">15개씩보기</option>
-		        <option value="20">20개씩보기</option>
-			</select>
-		</div>
+			<div class="col">
+				<select id="rowsPerPage">
+			        <option value="10" ${'10' eq param.rowsPerPage ? 'selected' : ''}>10개씩보기</option>
+			        <option value="15" ${'15' eq param.rowsPerPage ? 'selected' : ''}>15개씩보기</option>
+			        <option value="20" ${'20' eq param.rowsPerPage ? 'selected' : ''}>20개씩보기</option>
+				</select>
+			</div>
+		</form>
 	</div>
 	
 	<div class="row">
@@ -81,17 +81,19 @@
 <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
 <script>
 	$(function() {		
-		getPage(1);
+		getLocationSearch();
+		getPage();
 		getSearchResult();
 	});
 	
 	function getPage(page) {
 		
-		var rowsPerPage = $("#rowsPerPage").val();
-		var opt = $("#form-search-book select").val();
-		var keyword = $("#form-search-book input[name=value]").val();
+		const pageParam = Number(new URLSearchParams(location.search).get('page'));
+		page = (page) ? page : ((pageParam) ? pageParam : 1);
 		
-		console.log(rowsPerPage);
+		const rowsPerPage = $("#rowsPerPage").val();
+		const opt = $("#form-search-book select").val();
+		const keyword = $("#form-search-book input[name=value]").val();
 		
 		$.ajax({
 			
@@ -106,7 +108,7 @@
 				, value : keyword
 			},
 			success : function(data) {
-				
+
 				var criteria = data.criteria;
 				var pagination = criteria.pagination;
 				var books = data.books;
@@ -130,6 +132,10 @@
 				}
 			
 				$(".table tbody").html(str);
+				
+				const queryString = "page=" +page+ "&rowsPerPage=" +rowsPerPage+ "&pagesPerBlock=" + criteria.pagesPerBlock+ "&opt=" +opt+ "&value=" +keyword;
+				const currentURL = location.pathname + '?' + queryString;
+				history.replaceState(null, null, currentURL);
 				
 				paging(criteria, pagination, page);
 				// //데이터 호출 영역				
@@ -204,10 +210,6 @@
 			
 			getPage(page, rowsPerPage);
 			
-			var currentURL = "/list/book?page=" + page;
-			
-			history.pushState(null, null, currentURL);
-			
 		})
 		// //페이징 영역
 	}
@@ -215,17 +217,29 @@
 	function getSearchResult() {
 		$("#form-search-book input[name=value]").keyup(function(e){
 			if(e.keyCode === 13) {
-				console.log('검색기능작동');
-				console.log($("#form-search-book input[name=value]").val());
 				getPage(1);
+			}
+		})
+	}
+	
+	function getLocationSearch() {
+		if(!location.search) {
+			return false;
+		}
+		
+		const form = $("#form-search-book");
+		
+		new URLSearchParams(location.search).forEach((value, key) => {
+			if (form[key]) {
+				form[key].value = value;
 			}
 		})
 	}
 	
 	/*
 		해결해야할 문제
-		1. 페이지네이션의 링크를 클릭시 데이터는 페이지에 맞는 내용으로 변경되지만, 상단의 페이지 경로가 변경되지 않음.
-			=> 변경은 가능하나 새로고침시 현재 상태가 유지되지 않음. 새로고침시에 변경된 정보들을 가지고 갈 수 있어야함
+		1. 예외처리 기능 구현
+			=> 검색시 검색 내용이 존재하지 않을 때, 예외처리 필요
 		
 		추가해볼만한기능
 		1. 검색기능 - (완료)
@@ -245,6 +259,8 @@
 				=> 위 방식으로 변경하니 정상적으로 전달되는 값이 restController 값에 대입되어 변경된 값을 확인 가능하며 검색도 가능해짐
 		3.(new) 페이지네이션 작동시 마지막 블록에서 표현되지 않아야할 블록이 나타나는 현상이 있음
 			=> 해결 totalBlocks 의 계산식 오류가 있어 해당식을 수정
+		4. 페이지네이션의 링크를 클릭시 데이터는 페이지에 맞는 내용으로 변경되지만, 상단의 페이지 경로가 변경되지 않음. - (완료 22-04-17)
+			=> 새로고침시 이전 정보를 유지할 수 있도록 상태 변경
 	*/
 </script>
 </body>
