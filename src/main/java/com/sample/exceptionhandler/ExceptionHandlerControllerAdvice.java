@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.sample.dto.ResponseDto;
 import com.sample.exception.CartErrorException;
 import com.sample.exception.CustomException;
+import com.sample.exception.ListErrorException;
 import com.sample.exception.LoginErrorException;
 
 /*
@@ -56,6 +57,16 @@ public class ExceptionHandlerControllerAdvice {
 
 	@ExceptionHandler(CartErrorException.class)
 	public @ResponseBody ResponseDto<?> handleCartErrorException(CartErrorException e) {
+		e.printStackTrace();
+		ResponseDto<?> response = new ResponseDto<>();
+		response.setStatus("FAIL");
+		response.setError(e.getMessage());
+		
+		return response;
+	}
+	
+	@ExceptionHandler(ListErrorException.class)
+	public @ResponseBody ResponseDto<?> handleCartErrorException(ListErrorException e) {
 		e.printStackTrace();
 		ResponseDto<?> response = new ResponseDto<>();
 		response.setStatus("FAIL");

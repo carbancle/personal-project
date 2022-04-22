@@ -2,6 +2,10 @@ package com.sample.vo;
 
 import java.util.Date;
 
+import org.springframework.format.annotation.DateTimeFormat;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -17,8 +21,14 @@ public class Book {
 	private String publisher;		// 출판사
 	private Integer price;			// 가격
 	private Integer discountPrice;	// 할인가격
+	@JsonFormat(pattern = "yyyy년 M월 d일", timezone = "Asia/Seoul")
+	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private Date pubDate;
-	private int stock;				// 재고
-	private Date createdDate;
+	private int stock;
+	@JsonFormat(pattern = "yyyy년 M월 d일 H시 m분 s초", timezone = "Asia/Seoul")
+	@DateTimeFormat(pattern = "yyyy-MM-dd hh:mm:ss")
 	private Date updatedDate;
+	@JsonFormat(pattern = "yyyy년 M월 d일 H시 m분 s초", timezone = "Asia/Seoul")
+	@DateTimeFormat(pattern = "yyyy-MM-dd hh:mm:ss")
+	private Date createdDate;
 }
