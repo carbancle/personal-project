@@ -19,6 +19,10 @@ public class BookService {
 	@Autowired
 	BookMapper bookMapper;
 	
+	public void insertBook(Book book) {
+		bookMapper.insertBook(book);
+	}
+	
 	// 전체 도서 리스트의 갯수를 조회
 	public int getTotalRows(Criteria criteria) {
 		return bookMapper.getBooksTotalRows(criteria);

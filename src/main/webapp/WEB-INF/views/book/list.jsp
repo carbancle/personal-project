@@ -110,12 +110,24 @@
 			success : function(data) {
 
 				var criteria = data.criteria;
-				var pagination = criteria.pagination;
 				var books = data.books;
 				
 				var str = "";
 				
-				for (var i = criteria.pagination.begin - 1; i < criteria.pagination.end; i++) {
+				if(!Object.keys(data).length) {
+					
+					str += "<tr>";
+					str += '<td colspan="6">등록된 게시글이 없습니다.</td>';
+					str += "</tr>";
+					
+					$(".table tbody").html(str);
+					
+					paging();
+					
+					return false;
+				}
+				
+				for (var i = data.criteria.pagination.begin - 1; i < data.criteria.pagination.end; i++) {
 					
 					if(books[i] == null) {
 						break;
@@ -137,7 +149,7 @@
 				const currentURL = location.pathname + '?' + queryString;
 				history.replaceState(null, null, currentURL);
 				
-				paging(criteria, pagination, page);
+				paging(data, page);
 				// //데이터 호출 영역				
 				
 				$("#rowsPerPage").change(function(){
@@ -146,10 +158,6 @@
 					getPage(page, criteria.rowsPerPage);
 				})
 				
-				console.log("현재 페이지번호 : " + page);
-				console.log("현재 블록의 값 : " + pagination.currentBlock);
-				console.log("전체 블록의 값 : " + pagination.totalBlocks);
-				console.log("전체 페이지 : " + pagination.totalPages);
 			},
 			error : function() {
 				alert('data load error');
@@ -158,9 +166,19 @@
 	
 	}
 	
-	function paging(criteria, pagination, page) {
+	function paging(data, page) {
 		// 페이징 영역
 		var pageHtml = "";
+		
+		if(!data) {
+			$(".pagination").html(pageHtml);
+			
+			return false;
+		}
+		
+		var pagination = data.criteria.pagination;
+		
+		
 		
 		if (pagination.existPrev) {
 			pageHtml += "<li class='page-item'>"
@@ -174,7 +192,7 @@
 		
 		//페이징 번호 표시
 		for (var i = pagination.beginPage; i <= pagination.endPage; i++) {
-			if (i == criteria.page) {
+			if (i == data.criteria.page) {
 				pageHtml += "<li class='page-item active'>"
 				pageHtml +=	"<a class='page-link' href='/list/book?page=" + i + "' data-page=" + i + ">" + i + "</a>"
 	    		pageHtml += "</li>"
@@ -219,6 +237,11 @@
 			if(e.keyCode === 13) {
 				getPage(1);
 			}
+
+		})
+		
+		$("#form-search-book #btn-search-book").click(function(){
+			getPage(1);
 		})
 	}
 	
